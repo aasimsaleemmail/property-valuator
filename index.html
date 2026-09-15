@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gujar Khan Property Valuator</title>
+<style>
+  :root{
+    --ink:#16261f;
+    --paper:#f5f2ea;
+    --panel:#ffffff;
+    --line:#d8d2c0;
+    --accent:#8a5a2b;
+    --accent-2:#3c6e5a;
+    --muted:#6b6355;
+    --danger:#8a3324;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#eae5d8;
+      --paper:#12160f;
+      --panel:#1b2119;
+      --line:#333c30;
+      --accent:#d99a52;
+      --accent-2:#7fb89c;
+      --muted:#9a9382;
+      --danger:#e2836f;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#eae5d8;
+    --paper:#12160f;
+    --panel:#1b2119;
+    --line:#333c30;
+    --accent:#d99a52;
+    --accent-2:#7fb89c;
+    --muted:#9a9382;
+    --danger:#e2836f;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Georgia', 'Iowan Old Style', 'Palatino Linotype', serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+  header{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:16px;
+    margin-bottom:22px;
+  }
+  .kicker{
+    font-family:'Courier New', monospace;
+    font-size:12px;
+    letter-spacing:0.04em;
+    color:var(--muted);
+    margin:0 0 6px;
+  }
+  h1{
+    margin:0;
+    font-size:26px;
+    font-weight:700;
+    line-height:1.25;
+  }
+  .subhead{
+    margin:8px 0 0;
+    color:var(--muted);
+    font-size:14.5px;
+    line-height:1.5;
+    max-width:52ch;
+  }
+
+  .field{
+    margin-bottom:16px;
+  }
+  label{
+    display:block;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  select, input[type=number]{
+    width:100%;
+    padding:12px 12px;
+    font-size:16px;
+    font-family:inherit;
+    background:var(--panel);
+    color:var(--ink);
+    border:1.5px solid var(--line);
+    border-radius:3px;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  select:focus, input:focus{
+    outline:2px solid var(--accent-2);
+    outline-offset:1px;
+  }
+  select:disabled{
+    opacity:0.5;
+  }
+  .select-wrap{position:relative;}
+  .select-wrap::after{
+    content:"▾";
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    pointer-events:none;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+
+  .rateline{
+    display:flex;
+    justify-content:space-between;
+    font-family:'Courier New', monospace;
+    font-size:13px;
+    color:var(--muted);
+    padding:10px 2px;
+    border-top:1px dashed var(--line);
+    margin-top:4px;
+  }
+
+  button{
+    width:100%;
+    padding:14px;
+    font-size:16px;
+    font-family:inherit;
+    font-weight:700;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:3px;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  button:active{opacity:0.85;}
+
+  .result{
+    margin-top:26px;
+    border:2px solid var(--ink);
+    background:var(--panel);
+    padding:20px;
+    border-radius:2px;
+    display:none;
+  }
+  .result.show{display:block;}
+  .result .label{
+    font-size:12px;
+    letter-spacing:0.03em;
+    color:var(--muted);
+    font-family:'Courier New', monospace;
+  }
+  .result .total{
+    font-size:32px;
+    font-weight:700;
+    margin:4px 0 14px;
+    color:var(--accent-2);
+  }
+  .breakdown{
+    font-size:14px;
+    line-height:1.9;
+    border-top:1px solid var(--line);
+    padding-top:12px;
+  }
+  .breakdown div{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .breakdown .muted{color:var(--muted);}
+
+  .note{
+    margin-top:26px;
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.6;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  .warn{
+    display:none;
+    color:var(--danger);
+    font-size:13px;
+    margin-top:8px;
+  }
+  .warn.show{display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">RAWALPINDI · TEHSIL GUJAR KHAN · URBAN</p>
+    <h1>Property Valuator</h1>
+    <p class="subhead">Estimates a property's DC-rate value from the official urban valuation table for Gujar Khan tehsil. Pick the ward, locality, and category, then enter the plot and covered area.</p>
+  </header>
+
+  <div class="field">
+    <label for="circle">Revenue Circle / Ward</label>
+    <div class="select-wrap">
+      <select id="circle"></select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="area">Property Area / Locality</label>
+    <div class="select-wrap">
+      <select id="area" disabled></select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="cls">Classification</label>
+    <div class="select-wrap">
+      <select id="cls" disabled></select>
+    </div>
+  </div>
+
+  <div class="rateline" id="rateline" style="display:none;">
+    <span id="dcrate-label">DC rate: —</span>
+    <span id="structrate-label">Structure rate: —</span>
+  </div>
+
+  <div class="field">
+    <label for="hasStructure">Does the property have a structure/building?</label>
+    <div class="select-wrap">
+      <select id="hasStructure">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="field">
+      <label for="landsize">Plot size (Marla)</label>
+      <input type="number" id="landsize" min="0" step="0.01" placeholder="e.g. 5">
+    </div>
+    <div class="field" id="coveredField" style="display:none;">
+      <label for="covered">Covered area (sq ft)</label>
+      <input type="number" id="covered" min="0" step="1" placeholder="e.g. 1200">
+    </div>
+  </div>
+
+  <div class="field" id="approvedField" style="display:none;">
+    <label for="approved">Is the structure's building plan approved?</label>
+    <div class="select-wrap">
+      <select id="approved">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="warn" id="warn">Choose a revenue circle, area and classification first.</p>
+
+  <button id="calc">Calculate value</button>
+
+  <div class="result" id="result">
+    <div class="label">ESTIMATED PROPERTY VALUE (PKR)</div>
+    <div class="total" id="totalval">—</div>
+    <div class="breakdown">
+      <div><span class="muted">Land value</span><span id="landval">—</span></div>
+      <div><span class="muted">Structure value</span><span id="structval">—</span></div>
+    </div>
+
+    <div class="label" style="margin-top:20px;">REGISTRATION &amp; TRANSFER CHARGES (PKR)</div>
+    <div class="breakdown">
+      <div><span class="muted">Stamp duty (1% of land + structure value)</span><span id="stampduty">—</span></div>
+      <div><span class="muted">TTIP tax (1% of land + structure value)</span><span id="ttiptax">—</span></div>
+      <div id="extradutyRow" style="display:none;"><span class="muted">Additional stamp duty — plan not approved (2%)</span><span id="extraduty">—</span></div>
+      <div><span class="muted">Registration fee (fixed)</span><span id="regfee">—</span></div>
+      <div><span class="muted">PLRA service charges (fixed)</span><span id="plrafee">—</span></div>
+      <div><span class="muted">Local commission (fixed)</span><span id="commfee">—</span></div>
+    </div>
+    <div class="breakdown" style="border-top:1.5px solid var(--ink); margin-top:8px; padding-top:10px; font-weight:700;">
+      <div><span>Total charges</span><span id="totalcharges">—</span></div>
+    </div>
+
+    <div class="label" style="margin-top:20px;">GRAND TOTAL (VALUE + CHARGES)</div>
+    <div class="total" id="grandtotal" style="font-size:26px;">—</div>
+  </div>
+
+  <p class="note">Formula: Land value = plot size (Marla) × DC rate per Marla. Structure value = covered area (sq ft) × structure rate per sq ft (only counted if you select "Yes" for structure). Combined value = land value + structure value. Stamp duty and TTIP tax are each 1% of the combined value. If a structure exists and its plan is not approved, an additional 2% stamp duty is charged on the combined value. Fixed charges: registration fee Rs. 500, PLRA service charges Rs. 3,600, local commission Rs. 5,500. This is an estimate based on official DC rates and standard charges only — actual government charges can change and may include additional taxes not listed here. Source: Urban Valuation Table, Tehsil Gujar Khan, District Rawalpindi.</p>
+</div>
+
+<script>
+const DATA = [{"RevenueCircle": "Gujar Khan", "PropertyArea": "Housing Scheme No 2", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1143450, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "Housing Scheme No 2", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2699812, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "Housing Scheme No 2", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 254100, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "Housing Scheme No 2", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 808500, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "Model Town Housing Scheme", "Classification": "Commercial", "Location": "On Road", "DcRate": 4389000, "UOM": "Marla", "StructureRate": 1692}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "Model Town Housing Scheme", "Classification": "Residential", "Location": "Off Road", "DcRate": 1227187, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "New Metro City", "Classification": "Commercial", "Location": "Off Road", "DcRate": 1200000, "UOM": "Marla", "StructureRate": 1620}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "New Metro City", "Classification": "Commercial", "Location": "On Road", "DcRate": 1680000, "UOM": "Marla", "StructureRate": 1620}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "New Metro City", "Classification": "Residential", "Location": "Off Road", "DcRate": 720000, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "New Metro City", "Classification": "Residential", "Location": "On Road", "DcRate": 960000, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "Tariq Shareef Smart City", "Classification": "Commercial", "Location": "Off Road", "DcRate": 1200000, "UOM": "Marla", "StructureRate": 1620}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "Tariq Shareef Smart City", "Classification": "Commercial", "Location": "On Road", "DcRate": 1680000, "UOM": "Marla", "StructureRate": 1620}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "Tariq Shareef Smart City", "Classification": "Residential", "Location": "Off Road", "DcRate": 720000, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Gujar Khan", "PropertyArea": "Tariq Shareef Smart City", "Classification": "Residential", "Location": "On Road", "DcRate": 960000, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Barkibadhal", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 3757133, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Barkibadhal", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 4900618, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Barkibadhal", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1235364, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Barkibadhal", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1572278, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Barkibadhal Near G.T.Road", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 3757133, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Barkibadhal Near G.T.Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 5390696, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Barkibadhal Near G.T.Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1909191, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Barkibadhal Near G.T.Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2358417, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Gujar Khan Land Inside City", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 3455760, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Gujar Khan Land Inside City", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 5197500, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Gujar Khan Land Inside City", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 698775, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Gujar Khan Land Inside City", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1155000, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Gujar Khan Near Kass", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1408938, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Gujar Khan Near Kass", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2450320, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Gujar Khan Near Kass", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.1", "PropertyArea": "Gujar Khan Near Kass", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.10", "PropertyArea": "Gujar Khan", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 2583053, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.10", "PropertyArea": "Gujar Khan", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3675475, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.10", "PropertyArea": "Gujar Khan", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.10", "PropertyArea": "Gujar Khan", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1459977, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.10", "PropertyArea": "Main Bazar", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 12915094, "UOM": "Marla", "StructureRate": 1934}, {"RevenueCircle": "Gujar Khan Ward No.10", "PropertyArea": "Main Bazar", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 15926988, "UOM": "Marla", "StructureRate": 1934}, {"RevenueCircle": "Gujar Khan Ward No.10", "PropertyArea": "Main Bazar", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 2358417, "UOM": "Marla", "StructureRate": 967}, {"RevenueCircle": "Gujar Khan Ward No.10", "PropertyArea": "Main Bazar", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2807643, "UOM": "Marla", "StructureRate": 967}, {"RevenueCircle": "Gujar Khan Ward No.11", "PropertyArea": "Gujar Khan", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 3522334, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.11", "PropertyArea": "Gujar Khan", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 6615851, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.11", "PropertyArea": "Gujar Khan", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.11", "PropertyArea": "Gujar Khan", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1459977, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.11", "PropertyArea": "Halwai Gali", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 5400906, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.11", "PropertyArea": "Halwai Gali", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 6148052, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.11", "PropertyArea": "Halwai Gali", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 1459977, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.11", "PropertyArea": "Halwai Gali", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2133804, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Barki Chohan (Off Road)", "Classification": "Commercial", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Barki Chohan (Off Road)", "Classification": "Residential", "Location": "Off Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Barki Chohan (On Road)", "Classification": "Commercial", "Location": "On Road", "DcRate": 3430442, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Barki Chohan (On Road)", "Classification": "Residential", "Location": "On Road", "DcRate": 1347665, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "G.T.Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 3557400, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "G.T.Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 5463150, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "G.T.Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1909191, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "G.T.Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2668050, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Ghair Mumkin Garh", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Ghair Mumkin Garh", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3185408, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Ghair Mumkin Garh", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Ghair Mumkin Garh", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1123059, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "M.C Gujar Khan", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1643749, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "M.C Gujar Khan", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2450320, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "M.C Gujar Khan", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "M.C Gujar Khan", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 898445, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Near Khass", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1995978, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Near Khass", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 2940363, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Near Khass", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Near Khass", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Old Gulyana Road", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Old Gulyana Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2450320, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Old Gulyana Road", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Old Gulyana Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Village Barki Badhal", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Village Barki Badhal", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3430442, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Village Barki Badhal", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.12", "PropertyArea": "Village Barki Badhal", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1347665, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.13", "PropertyArea": "Qazian Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 3811500, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.13", "PropertyArea": "Qazian Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 4065600, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.13", "PropertyArea": "Qazian Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 609840, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.13", "PropertyArea": "Qazian Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1079925, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.13", "PropertyArea": "Village Jhanda", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2113395, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.13", "PropertyArea": "Village Jhanda", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3185408, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.13", "PropertyArea": "Village Jhanda", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.13", "PropertyArea": "Village Jhanda", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 561530, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Dhok Hayat Ali", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1643749, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Dhok Hayat Ali", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2450320, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Dhok Hayat Ali", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Dhok Hayat Ali", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Dhok Musalian", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2113395, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Dhok Musalian", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2940363, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Dhok Musalian", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Dhok Musalian", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1123059, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "M.C Gujar Khan", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1643749, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "M.C Gujar Khan", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2695354, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "M.C Gujar Khan", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "M.C Gujar Khan", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1123059, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Near G.T.Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 4226791, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Near G.T.Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 4900618, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Near G.T.Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1684590, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Near G.T.Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2583042, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Near Railway Line", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2113395, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Near Railway Line", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2940363, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Near Railway Line", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Near Railway Line", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 898445, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Sandal Road (Karuli)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1643749, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Sandal Road (Karuli)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3185408, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Sandal Road (Karuli)", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Sandal Road (Karuli)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Sukho Road", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Sukho Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2450320, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Sukho Road", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Sukho Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Takya Gohar Rahim Shah", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Takya Gohar Rahim Shah", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3430442, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Takya Gohar Rahim Shah", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.14", "PropertyArea": "Takya Gohar Rahim Shah", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Behind Cinema (Cohan Najjar)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Behind Cinema (Cohan Najjar)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3185408, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Behind Cinema (Cohan Najjar)", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Behind Cinema (Cohan Najjar)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1123059, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Chohan Najjar", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Chohan Najjar", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3430442, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Chohan Najjar", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Chohan Najjar", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1235364, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Chohan Najjar (Off Road)", "Classification": "Commercial", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Chohan Najjar (Off Road)", "Classification": "Residential", "Location": "Off Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Chohan Najjar (On Road)", "Classification": "Commercial", "Location": "On Road", "DcRate": 3430442, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Chohan Najjar (On Road)", "Classification": "Residential", "Location": "On Road", "DcRate": 1235364, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "M.C Gujar Khan", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "M.C Gujar Khan", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3185408, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "M.C Gujar Khan", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "M.C Gujar Khan", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1235364, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Near G.T.Road", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 3287510, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Near G.T.Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 4165530, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Near G.T.Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1909191, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Near G.T.Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2133804, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Near Grid Station", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2817853, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Near Grid Station", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 3920496, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Near Grid Station", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "Near Grid Station", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1123059, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "New Gulyana Road (Nagial Umar Khan)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2817853, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "New Gulyana Road (Nagial Umar Khan)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3430442, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "New Gulyana Road (Nagial Umar Khan)", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.15", "PropertyArea": "New Gulyana Road (Nagial Umar Khan)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1235364, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Dhok Amir Baz (Near Kass)", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Dhok Amir Baz (Near Kass)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3430442, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Dhok Amir Baz (Near Kass)", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Dhok Amir Baz (Near Kass)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Dhok Hayat Ali", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2113395, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Dhok Hayat Ali", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2940363, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Dhok Hayat Ali", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Dhok Hayat Ali", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 898445, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Sandal Road (Karuli Badhal)", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Sandal Road (Karuli Badhal)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2695354, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Sandal Road (Karuli Badhal)", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Sandal Road (Karuli Badhal)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Sukho Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1643749, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Sukho Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2695354, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Sukho Road", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Sukho Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 898445, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Village Karuli (Dhok Hayat Ali)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Village Karuli (Dhok Hayat Ali)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3185408, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Village Karuli (Dhok Hayat Ali)", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.16", "PropertyArea": "Village Karuli (Dhok Hayat Ali)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.17", "PropertyArea": "Jhanda Village", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.17", "PropertyArea": "Jhanda Village", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2940363, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.17", "PropertyArea": "Jhanda Village", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.17", "PropertyArea": "Jhanda Village", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 898445, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.17", "PropertyArea": "Near Railway Line", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1643749, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.17", "PropertyArea": "Near Railway Line", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2940363, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.17", "PropertyArea": "Near Railway Line", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.17", "PropertyArea": "Near Railway Line", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.18", "PropertyArea": "M.C Gujar Khan (Old Barki Road)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.18", "PropertyArea": "M.C Gujar Khan (Old Barki Road)", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 2940363, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.18", "PropertyArea": "M.C Gujar Khan (Old Barki Road)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.18", "PropertyArea": "M.C Gujar Khan (Old Barki Road)", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.18", "PropertyArea": "Near Railway Line", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.18", "PropertyArea": "Near Railway Line", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3185408, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.18", "PropertyArea": "Near Railway Line", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.18", "PropertyArea": "Near Railway Line", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "Gujar Khan Near Kass", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "Gujar Khan Near Kass", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2940363, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "Gujar Khan Near Kass", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "Gujar Khan Near Kass", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "Near Grid Station (Nagail Umar Khan)", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 2583053, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "Near Grid Station (Nagail Umar Khan)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3675475, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "Near Grid Station (Nagail Umar Khan)", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "Near Grid Station (Nagail Umar Khan)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1123059, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "New Gulyana Road (West)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "New Gulyana Road (West)", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 3185408, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "New Gulyana Road (West)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.19", "PropertyArea": "New Gulyana Road (West)", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Near G.T.Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 3811500, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Near G.T.Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 5463150, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Near G.T.Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 2159850, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Near G.T.Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2413950, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Near Railway Road Gujar Khan", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2817853, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Near Railway Road Gujar Khan", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 3920496, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Near Railway Road Gujar Khan", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Near Railway Road Gujar Khan", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Takia Baba Rahim Shah", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 3052676, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Takia Baba Rahim Shah", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 4410563, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Takia Baba Rahim Shah", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Takia Baba Rahim Shah", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1123059, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Village Barki Badhal (Barki Jadeed)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2817853, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Village Barki Badhal (Barki Jadeed)", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 3920496, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Village Barki Badhal (Barki Jadeed)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 561530, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.2", "PropertyArea": "Village Barki Badhal (Barki Jadeed)", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Gujar Khan Near Kass Railway Station", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Gujar Khan Near Kass Railway Station", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 3675475, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Gujar Khan Near Kass Railway Station", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 561530, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Gujar Khan Near Kass Railway Station", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Habib Kanyal (Off Road)", "Classification": "Commercial", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Habib Kanyal (Off Road)", "Classification": "Residential", "Location": "Off Road", "DcRate": 561530, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Habib Kanyal (On Road)", "Classification": "Commercial", "Location": "On Road", "DcRate": 3675475, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Habib Kanyal (On Road)", "Classification": "Residential", "Location": "On Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Qazian Road.Habib Kanyal (Chohan Najjar)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Qazian Road.Habib Kanyal (Chohan Najjar)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3465000, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Qazian Road.Habib Kanyal (Chohan Najjar)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 561530, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Qazian Road.Habib Kanyal (Chohan Najjar)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 866250, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Village Habib Kanyal (Chohan Najjar)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Village Habib Kanyal (Chohan Najjar)", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 3675475, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Village Habib Kanyal (Chohan Najjar)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 561530, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.3", "PropertyArea": "Village Habib Kanyal (Chohan Najjar)", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Gujar Khan Chohan Najjar (Club Cafe)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2817853, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Gujar Khan Chohan Najjar (Club Cafe)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3430442, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Gujar Khan Chohan Najjar (Club Cafe)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1235364, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Gujar Khan Chohan Najjar (Club Cafe)", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1459977, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Hospital Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 7612916, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Hospital Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 8208538, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Hospital Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1942882, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Hospital Road", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 2093379, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Near G.T.Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 4696437, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Near G.T.Road", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 6125784, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Near G.T.Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1909191, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Near G.T.Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2358417, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Railway Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 5870541, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Railway Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 12251547, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Railway Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1459977, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.4", "PropertyArea": "Railway Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1909191, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Gujar Khan Housing Scheme No.1", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 6098400, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Gujar Khan Housing Scheme No.1", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 10799250, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Gujar Khan Housing Scheme No.1", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 2541000, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Gujar Khan Housing Scheme No.1", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2795100, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Mohallah Hafiz Abad Dhok Barki Badhal, Chail", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2817853, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Mohallah Hafiz Abad Dhok Barki Badhal, Chail", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 3920496, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Mohallah Hafiz Abad Dhok Barki Badhal, Chail", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Mohallah Hafiz Abad Dhok Barki Badhal, Chail", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Near G.T.Road", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 8576106, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Near G.T.Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1909191, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Near G.T.Road", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2583042, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Sarafa Bazar", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 10097321, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Sarafa Bazar", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 12251547, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Sarafa Bazar", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 3256880, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.5", "PropertyArea": "Sarafa Bazar", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 4379932, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Gujar Khan", "Classification": "Commercial - Off Road", "Location": "On Road", "DcRate": 3052676, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Gujar Khan", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 3920496, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Gujar Khan", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Gujar Khan", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1459977, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Hayat Sar Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 4696437, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Hayat Sar Road", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 6125784, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Hayat Sar Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Hayat Sar Road", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1459977, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Near Grave Yard (Baba Talib Shah)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1643749, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Near Grave Yard (Baba Talib Shah)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2450320, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Near Grave Yard (Baba Talib Shah)", "Classification": "Residential - Off Road", "Location": "On Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.6", "PropertyArea": "Near Grave Yard (Baba Talib Shah)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Gujar Khan", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Gujar Khan", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 3675475, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Gujar Khan", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Gujar Khan", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1235364, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Nagail Umar Khan", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 2348230, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Nagail Umar Khan", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 3675475, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Nagail Umar Khan", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Nagail Umar Khan", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1235364, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Near G.T.Road (Near Jinah Hotal)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 4696437, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Near G.T.Road (Near Jinah Hotal)", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 6370818, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Near G.T.Road (Near Jinah Hotal)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 2133804, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Near G.T.Road (Near Jinah Hotal)", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 2807643, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Near Kass Road", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1643749, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Near Kass Road", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 2450320, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Near Kass Road", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.7", "PropertyArea": "Near Kass Road", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Darbar Sain Talib Shah", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1056696, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Darbar Sain Talib Shah", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 1960253, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Darbar Sain Talib Shah", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 561530, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Darbar Sain Talib Shah", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Gujar Khan (Dhok Shah Zaman Dakhli Karoli)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1878572, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Gujar Khan (Dhok Shah Zaman Dakhli Karoli)", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 2450320, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Gujar Khan (Dhok Shah Zaman Dakhli Karoli)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Gujar Khan (Dhok Shah Zaman Dakhli Karoli)", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 1010752, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Near Kass", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1408938, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Near Kass", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2205287, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Near Kass", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.8", "PropertyArea": "Near Kass", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Darbar Sain Talib Shah (Near Kass)", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1056696, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Darbar Sain Talib Shah (Near Kass)", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 1960253, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Darbar Sain Talib Shah (Near Kass)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Darbar Sain Talib Shah (Near Kass)", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Dhok Amir Bazz", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1174103, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Dhok Amir Bazz", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 1960253, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Dhok Amir Bazz", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 432109, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Dhok Amir Bazz", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Gujar Khan", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 1643749, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Gujar Khan", "Classification": "Commercial - On Road", "Location": "On Road", "DcRate": 2695354, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Gujar Khan", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 786143, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Gujar Khan Ward No.9", "PropertyArea": "Gujar Khan", "Classification": "Residential - On Road", "Location": "On Road", "DcRate": 1235364, "UOM": "Marla", "StructureRate": 814}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala (Mera)", "Classification": "Agricultural", "Location": "Off Road", "DcRate": 55000, "UOM": "Marla", "StructureRate": 0}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban", "Classification": "Agricultural", "Location": "Off Road", "DcRate": 55000, "UOM": "Marla", "StructureRate": 0}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban", "Classification": "Commercial - Off Road", "Location": "Off Road", "DcRate": 3522334, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban", "Classification": "Commercial - On Road", "Location": "Off Road", "DcRate": 6125784, "UOM": "Marla", "StructureRate": 1614}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 673835, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 153730, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban", "Classification": "Residential - On Road", "Location": "Off Road", "DcRate": 898445, "UOM": "Marla", "StructureRate": 767}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (Off Road)", "Classification": "Agricultural", "Location": "Off Road", "DcRate": 55000, "UOM": "Marla", "StructureRate": 0}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (Off Road)", "Classification": "Residential", "Location": "Off Road", "DcRate": 153730, "UOM": "Marla", "StructureRate": 800}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (Off Road)", "Classification": "Residential", "Location": "Off Road", "DcRate": 169103, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (Off Road)", "Classification": "Residential", "Location": "Off Road", "DcRate": 169103, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (Off Road)", "Classification": "Residential", "Location": "Off Road", "DcRate": 153730, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (Off Road)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 153730, "UOM": "Marla", "StructureRate": 0}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (Off Road)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 153730, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (Off Road)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 188888, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (Off Road)", "Classification": "Residential - Off Road", "Location": "Off Road", "DcRate": 55000, "UOM": "Marla", "StructureRate": 840}, {"RevenueCircle": "Doutala Urban", "PropertyArea": "Daultala Urban (On Road)", "Classification": "Commercial", "Location": "On Road", "DcRate": 3689532, "UOM": "Marla", "StructureRate": 1614}];
+
+const circleSel = document.getElementById('circle');
+const areaSel = document.getElementById('area');
+const clsSel = document.getElementById('cls');
+const rateline = document.getElementById('rateline');
+const dcrateLabel = document.getElementById('dcrate-label');
+const structrateLabel = document.getElementById('structrate-label');
+const warn = document.getElementById('warn');
+const resultBox = document.getElementById('result');
+
+function unique(arr){ return [...new Set(arr)]; }
+function fmt(n){ return Math.round(n).toLocaleString('en-PK'); }
+
+function populateCircles(){
+  const circles = unique(DATA.map(r => r.RevenueCircle)).sort();
+  circleSel.innerHTML = '<option value="">Select ward…</option>' +
+    circles.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+function populateAreas(){
+  const circle = circleSel.value;
+  areaSel.innerHTML = '<option value="">Select locality…</option>';
+  clsSel.innerHTML = '<option value="">—</option>';
+  clsSel.disabled = true;
+  rateline.style.display = 'none';
+  resultBox.classList.remove('show');
+  if(!circle){ areaSel.disabled = true; return; }
+  const areas = unique(DATA.filter(r => r.RevenueCircle === circle).map(r => r.PropertyArea)).sort();
+  areaSel.innerHTML += areas.map(a => `<option value="${a}">${a}</option>`).join('');
+  areaSel.disabled = false;
+}
+
+function populateClassifications(){
+  const circle = circleSel.value;
+  const area = areaSel.value;
+  clsSel.innerHTML = '<option value="">Select category…</option>';
+  rateline.style.display = 'none';
+  resultBox.classList.remove('show');
+  if(!area){ clsSel.disabled = true; return; }
+  const rows = DATA.filter(r => r.RevenueCircle === circle && r.PropertyArea === area);
+  clsSel.innerHTML += rows.map((r,i) => `<option value="${i}">${r.Classification} (${r.Location})</option>`).join('');
+  clsSel.disabled = false;
+  clsSel.dataset.rows = JSON.stringify(rows);
+}
+
+function showRate(){
+  resultBox.classList.remove('show');
+  const idx = clsSel.value;
+  if(idx === ''){ rateline.style.display = 'none'; return; }
+  const rows = JSON.parse(clsSel.dataset.rows || '[]');
+  const row = rows[idx];
+  if(!row){ rateline.style.display = 'none'; return; }
+  dcrateLabel.textContent = `DC rate: PKR ${fmt(row.DcRate)} / ${row.UOM}`;
+  structrateLabel.textContent = `Structure: PKR ${fmt(row.StructureRate)} / sq ft`;
+  rateline.style.display = 'flex';
+}
+
+circleSel.addEventListener('change', populateAreas);
+areaSel.addEventListener('change', populateClassifications);
+clsSel.addEventListener('change', showRate);
+
+const hasStructureSel = document.getElementById('hasStructure');
+const coveredField = document.getElementById('coveredField');
+const approvedField = document.getElementById('approvedField');
+
+function toggleStructureFields(){
+  const yes = hasStructureSel.value === 'yes';
+  coveredField.style.display = yes ? 'block' : 'none';
+  approvedField.style.display = yes ? 'block' : 'none';
+  if(!yes){
+    document.getElementById('covered').value = '';
+  }
+  resultBox.classList.remove('show');
+}
+hasStructureSel.addEventListener('change', toggleStructureFields);
+
+document.getElementById('calc').addEventListener('click', () => {
+  const idx = clsSel.value;
+  const rows = JSON.parse(clsSel.dataset.rows || '[]');
+  const row = rows[idx];
+  const land = parseFloat(document.getElementById('landsize').value) || 0;
+  const hasStructure = hasStructureSel.value === 'yes';
+  const covered = hasStructure ? (parseFloat(document.getElementById('covered').value) || 0) : 0;
+  const approved = document.getElementById('approved').value === 'yes';
+
+  if(!row){
+    warn.classList.add('show');
+    resultBox.classList.remove('show');
+    return;
+  }
+  warn.classList.remove('show');
+
+  const landVal = land * row.DcRate;
+  const structVal = covered * row.StructureRate;
+  const combined = landVal + structVal;
+
+  const REG_FEE = 500;
+  const PLRA_FEE = 3600;
+  const COMM_FEE = 5500;
+  const stampDuty = combined * 0.01;
+  const ttipTax = combined * 0.01;
+  const extraDuty = (hasStructure && !approved) ? combined * 0.02 : 0;
+  const totalCharges = stampDuty + ttipTax + extraDuty + REG_FEE + PLRA_FEE + COMM_FEE;
+  const grandTotal = combined + totalCharges;
+
+  document.getElementById('totalval').textContent = 'Rs ' + fmt(combined);
+  document.getElementById('landval').textContent = 'Rs ' + fmt(landVal);
+  document.getElementById('structval').textContent = 'Rs ' + fmt(structVal);
+
+  document.getElementById('stampduty').textContent = 'Rs ' + fmt(stampDuty);
+  document.getElementById('ttiptax').textContent = 'Rs ' + fmt(ttipTax);
+  document.getElementById('extradutyRow').style.display = extraDuty > 0 ? 'flex' : 'none';
+  document.getElementById('extraduty').textContent = 'Rs ' + fmt(extraDuty);
+  document.getElementById('regfee').textContent = 'Rs ' + fmt(REG_FEE);
+  document.getElementById('plrafee').textContent = 'Rs ' + fmt(PLRA_FEE);
+  document.getElementById('commfee').textContent = 'Rs ' + fmt(COMM_FEE);
+  document.getElementById('totalcharges').textContent = 'Rs ' + fmt(totalCharges);
+  document.getElementById('grandtotal').textContent = 'Rs ' + fmt(grandTotal);
+
+  resultBox.classList.add('show');
+});
+
+populateCircles();
+</script>
+</body>
+</html>
